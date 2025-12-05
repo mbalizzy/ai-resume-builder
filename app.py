@@ -106,16 +106,31 @@ if submitted:
    # with open(pdf_path, "rb") as f:
    #     st.download_button("Download Styled PDF", f, file_name="resume.pdf", mime="application/pdf")
         
-        
-       # PDF export (works locally; disabled on cloud if wkhtmltopdf is unavailable)
-if WKHTMLTOPDF_EXISTS and config is not None:
-    pdf_path = "resume_styled.pdf"
-    pdfkit.from_string(html, pdf_path, configuration=config)
-    with open(pdf_path, "rb") as f:
-        st.download_button("Download Styled PDF", f, file_name="resume.pdf", mime="application/pdf")
-else:
-    st.info("Styled PDF export is available on your local machine. On the cloud, please use HTML or DOCX downloads.")
- 
+from jinja2 import Environment, FileSystemLoader
+from weasyprint import HTML
+import os
+
+# Set up Jinja2 environment to load templates
+env = Environment(loader=FileSystemLoader("templates"))
+
+def export_resume_to_pdf(template_name, context, output_path="outputs/resume.pdf"):
+    """
+    Render a Jinja2 HTML template with context data and export to PDF using WeasyPrint.
+    
+    Args:
+        template_name (str): The name of the HTML template file (e.g., 'resume_template.html').
+        context (dict): Dictionary of values to inject into the template (e.g., name, skills).
+        output_path (str): Path where the PDF will be saved.
+    """
+    # Render HTML from template
+    template = env.get_template(template_name)
+    html_content = template.render(context)
+
+    # Export to PDF
+    HTML(string=html_content).write_pdf(output_path)
+
+    print(f"✅ Resume exported successfully to {output_path}")
+
         
         
 
